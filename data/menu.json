@@ -1,0 +1,82 @@
+{
+  "appetizers": [
+    {
+      "id": "app1",
+      "name": "Spring Rolls",
+      "description": "Crispy vegetable spring rolls served with sweet and sour sauce",
+      "price": 8.99,
+      "category": "appetizers",
+      "available": true
+    },
+    {
+      "id": "app2", 
+      "name": "Chicken Wings",
+      "description": "Spicy buffalo wings with ranch dressing",
+      "price": 12.99,
+      "category": "appetizers",
+      "available": true
+    }
+  ],
+  "mains": [
+    {
+      "id": "main1",
+      "name": "Grilled Chicken",
+      "description": "Marinated grilled chicken breast with herbs and vegetables",
+      "price": 18.99,
+      "category": "mains",
+      "available": true
+    },
+    {
+      "id": "main2",
+      "name": "Beef Burger",
+      "description": "Juicy beef patty with lettuce, tomato, and cheese",
+      "price": 15.99,
+      "category": "mains", 
+      "available": true
+    },
+    {
+      "id": "main3",
+      "name": "Pasta Carbonara",
+      "description": "Classic Italian pasta with cream sauce and bacon",
+      "price": 16.99,
+      "category": "mains",
+      "available": true
+    }
+  ],
+  "desserts": [
+    {
+      "id": "des1",
+      "name": "Chocolate Cake",
+      "description": "Rich chocolate cake with vanilla ice cream",
+      "price": 7.99,
+      "category": "desserts",
+      "available": true
+    },
+    {
+      "id": "des2",
+      "name": "Cheesecake",
+      "description": "New York style cheesecake with berry compote",
+      "price": 8.99,
+      "category": "desserts",
+      "available": true
+    }
+  ],
+  "beverages": [
+    {
+      "id": "bev1",
+      "name": "Fresh Orange Juice",
+      "description": "Freshly squeezed orange juice",
+      "price": 4.99,
+      "category": "beverages",
+      "available": true
+    },
+    {
+      "id": "bev2",
+      "name": "Coffee",
+      "description": "Premium espresso coffee",
+      "price": 3.99,
+      "category": "beverages",
+      "available": true
+    }
+  ]
+}

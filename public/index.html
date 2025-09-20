@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Menu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍽️ Digital Menu</h1>
+            <p>Welcome to our restaurant! Browse our menu and place your order.</p>
+        </header>
+
+        <main>
+            <!-- Cart Summary -->
+            <div id="cart-summary" class="cart-summary">
+                <h3>Your Order</h3>
+                <div id="cart-items"></div>
+                <div id="cart-total">Total: $0.00</div>
+                <button id="checkout-btn" class="btn btn-primary" disabled>Place Order</button>
+            </div>
+
+            <!-- Menu Categories -->
+            <div class="menu-categories">
+                <button class="category-btn active" data-category="all">All Items</button>
+                <button class="category-btn" data-category="appetizers">Appetizers</button>
+                <button class="category-btn" data-category="mains">Main Courses</button>
+                <button class="category-btn" data-category="desserts">Desserts</button>
+                <button class="category-btn" data-category="beverages">Beverages</button>
+            </div>
+
+            <!-- Menu Items -->
+            <div id="menu-items" class="menu-grid">
+                <!-- Menu items will be loaded here -->
+            </div>
+        </main>
+
+        <!-- Order Modal -->
+        <div id="order-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Complete Your Order</h2>
+                <form id="order-form">
+                    <div class="form-group">
+                        <label for="customer-name">Your Name:</label>
+                        <input type="text" id="customer-name" name="customerName" required>
+                    </div>
+                    <div id="order-summary"></div>
+                    <button type="submit" class="btn btn-primary">Confirm Order</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="success-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>✅ Order Placed Successfully!</h2>
+                <div id="success-message"></div>
+                <button class="btn btn-primary" onclick="location.reload()">Place Another Order</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><a href="/admin">Admin Panel</a> | Digital Menu System</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

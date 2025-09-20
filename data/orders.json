@@ -1,0 +1,25 @@
+[
+  {
+    "id": "order_1758333176870",
+    "customerName": "John Doe",
+    "items": [
+      {
+        "id": "main1",
+        "name": "Grilled Chicken",
+        "price": 18.99,
+        "quantity": 1
+      },
+      {
+        "id": "bev1",
+        "name": "Fresh Orange Juice",
+        "price": 4.99,
+        "quantity": 2
+      }
+    ],
+    "totalAmount": 28.97,
+    "status": "preparing",
+    "timestamp": "2025-09-20T01:52:56.870Z",
+    "orderNumber": 1,
+    "updatedAt": "2025-09-20T01:53:10.816Z"
+  }
+]
