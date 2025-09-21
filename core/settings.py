@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-#wf&*^c5rii=iqaa2#3!o#pj3k3k-@9!^07$w$y7bzwdtn5+sg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', '192.169.100.1']
+
 
 
 # Application definition
@@ -40,9 +41,15 @@ INSTALLED_APPS = [
 
     'menu',
     'parler',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'staff',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -53,6 +60,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'core.urls'
+
+CORS_ALLOW_ALL_ORIGINS = True  # For development only, allow any origin
+# OR better, whitelist your local network:
+# CORS_ALLOWED_ORIGINS = [
+#     "http://192.168.1.5:19006",  # Expo dev server
+# ]
 
 TEMPLATES = [
     {
@@ -149,4 +162,18 @@ PARLER_LANGUAGES = {
         'fallback': 'en',
         'hide_untranslated': False,
     }
+}
+
+
+
+
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
 }

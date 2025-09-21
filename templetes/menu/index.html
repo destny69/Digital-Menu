@@ -1,9 +1,80 @@
 {% extends 'base.html' %}
+
+{% block title %}Menu{% endblock %}
+
 {% block content %}
-  <h2>Menu - Table {{ table }}</h2>
-  <ul>
-    {% for item in menu_items %}
-      <li>{{ item.name }} - {{ item.price }} <br> <small>{{ item.description }}</small></li>
+<div class="menu-container">
+    <h1>Our Menu</h1>
+
+    {% for category in categories %}
+    <div class="category-section">
+        <h2>{{ category.name }}</h2>
+        <ul>
+            {% for item in category.items.all %}
+            <li class="menu-item">
+                <strong>{{ item.name }}</strong> - ₹{{ item.price }}
+                <p>{{ item.description }}</p>
+                <button class="add-cart" data-id="{{ item.id }}">Add to Cart</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
     {% endfor %}
-  </ul>
+
+    <a href="{% url 'menu:cart' %}" class="view-cart-btn">View Cart</a>
+</div>
+
+<!-- jQuery for AJAX -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('.add-cart').click(function(){
+        let itemId = $(this).data('id');
+        $.get("{% url 'menu:add_to_cart_ajax' 0 %}".replace('0', itemId), function(data){
+            if(data.success){
+                // Optionally, update cart count in header
+                alert(data.item_name + ' added to cart. Quantity: ' + data.quantity);
+            } else {
+                alert('Failed to add item to cart.');
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.menu-container {
+    width: 80%;
+    margin: 0 auto;
+}
+.category-section {
+    margin-bottom: 30px;
+}
+.menu-item {
+    margin-bottom: 10px;
+}
+.add-cart {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.add-cart:hover {
+    background-color: #45a049;
+}
+.view-cart-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #2196F3;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+.view-cart-btn:hover {
+    background-color: #0b7dda;
+}
+</style>
 {% endblock %}

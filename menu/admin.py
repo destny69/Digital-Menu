@@ -23,9 +23,15 @@ class MenuItemAdmin(TranslatableAdmin):
     search_fields = ("translations__name", "translations__description")
 
 
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "table", "total_price", "created_at")
-    list_filter = ("created_at", "table")
-    search_fields = ("id",)
-    filter_horizontal = ("items",)
+
+
+
+admin.site.register(Order)
+# @admin.register(Order)
+# class OrderAdmin(admin.ModelAdmin):
+#     list_display = ("id", "created_at", "status", "total_price")
+#     list_filter = ("status", "created_at")
+#     search_fields = ("id",)
+#     ordering = ("-created_at",)
+#     date_hierarchy = "created_at"
+
