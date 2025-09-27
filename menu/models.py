@@ -27,9 +27,19 @@ class MenuItem(TranslatableModel):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items')
 
+
     def __str__(self):
         return self.safe_translation_getter("name", any_language=True)
 
+
+# New model for multiple images
+class MenuItemImage(models.Model):
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to="menu_items/")  # folder inside MEDIA_ROOT
+    alt_text = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return f"{self.menu_item} Image"
 
 # Temporary cart item
 class CartItem(models.Model):

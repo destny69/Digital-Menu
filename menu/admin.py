@@ -1,6 +1,6 @@
 from django.contrib import admin
 from parler.admin import TranslatableAdmin
-from .models import Table, Category, MenuItem, Order
+from .models import Table, Category, MenuItem, Order, MenuItemImage
 
 
 @admin.register(Table)
@@ -24,7 +24,7 @@ class MenuItemAdmin(TranslatableAdmin):
 
 
 
-
+admin.site.register(MenuItemImage)
 
 admin.site.register(Order)
 # @admin.register(Order)

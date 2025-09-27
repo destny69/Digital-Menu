@@ -9,72 +9,277 @@
     {% for category in categories %}
     <div class="category-section">
         <h2>{{ category.name }}</h2>
-        <ul>
+        <div class="menu-grid">
             {% for item in category.items.all %}
-            <li class="menu-item">
-                <strong>{{ item.name }}</strong> - ₹{{ item.price }}
-                <p>{{ item.description }}</p>
-                <button class="add-cart" data-id="{{ item.id }}">Add to Cart</button>
-            </li>
+            <div class="menu-card">
+                {% if item.images.all %}
+                <div class="menu-image">
+                    <!-- First image as thumbnail -->
+                    <img src="{{ item.images.all.0.image.url }}" 
+                         alt="{{ item.name }}" 
+                         class="clickable-image"
+                         data-images='[{% for img in item.images.all %}"{{ img.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                </div>
+                {% endif %}
+                <div class="menu-info">
+                    <h3>{{ item.name }}</h3>
+                    <p class="description">{{ item.description }}</p>
+                    <p class="price">₹{{ item.price }}</p>
+                    <button class="add-cart" data-id="{{ item.id }}">Add to Cart</button>
+                </div>
+            </div>
             {% endfor %}
-        </ul>
+        </div>
     </div>
     {% endfor %}
 
     <a href="{% url 'menu:cart' %}" class="view-cart-btn">View Cart</a>
 </div>
 
-<!-- jQuery for AJAX -->
+<!-- Image Modal -->
+<div id="imageModal" class="image-modal">
+    <span class="close">&times;</span>
+    <span class="prev">&#10094;</span>
+    <span class="next">&#10095;</span>
+    <div class="modal-content-wrapper">
+        <img class="modal-content" id="modalImage">
+        <div id="dotsContainer" class="dots-container"></div>
+    </div>
+</div>
+
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- JS -->
 <script>
 $(document).ready(function(){
+
+    // ✅ Add to cart
     $('.add-cart').click(function(){
         let itemId = $(this).data('id');
         $.get("{% url 'menu:add_to_cart_ajax' 0 %}".replace('0', itemId), function(data){
             if(data.success){
-                // Optionally, update cart count in header
                 alert(data.item_name + ' added to cart. Quantity: ' + data.quantity);
             } else {
                 alert('Failed to add item to cart.');
             }
         });
     });
+
+    // ✅ Modal functionality
+    $('.clickable-image').click(function(){
+        let images = JSON.parse($(this).attr('data-images'));
+        let currentIndex = 0;
+
+        function showImage(index){
+            $('#modalImage').attr('src', images[index]);
+            updateDots();
+        }
+
+        function createDots(){
+            $('#dotsContainer').empty();
+            images.forEach((img, i) => {
+                let dot = $('<span class="dot"></span>');
+                dot.click(() => {
+                    currentIndex = i;
+                    showImage(currentIndex);
+                });
+                $('#dotsContainer').append(dot);
+            });
+        }
+
+        function updateDots(){
+            $('#dotsContainer .dot').removeClass('active');
+            $('#dotsContainer .dot').eq(currentIndex).addClass('active');
+        }
+
+        // Init modal
+        createDots();
+        showImage(currentIndex);
+        $('#imageModal').addClass('show').fadeIn();
+
+        // Close modal
+        $('.close').off('click').on('click', function(){
+            $('#imageModal').removeClass('show').fadeOut();
+        });
+        $('#imageModal').off('click').on('click', function(e){
+            if(e.target.id === 'imageModal'){
+                $(this).removeClass('show').fadeOut();
+            }
+        });
+
+        // Arrows
+        $('.prev').off('click').on('click', function(e){
+            e.stopPropagation();
+            if(images.length > 0){
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                showImage(currentIndex);
+            }
+        });
+        $('.next').off('click').on('click', function(e){
+            e.stopPropagation();
+            if(images.length > 0){
+                currentIndex = (currentIndex + 1) % images.length;
+                showImage(currentIndex);
+            }
+        });
+
+        // Mobile swipe
+        let startX = 0;
+        $('#modalImage').off('touchstart').on('touchstart', function(e){
+            startX = e.originalEvent.touches[0].clientX;
+        });
+        $('#modalImage').off('touchend').on('touchend', function(e){
+            let endX = e.originalEvent.changedTouches[0].clientX;
+            let diff = startX - endX;
+            if(Math.abs(diff) > 50){
+                if(diff > 0){ $('.next').click(); } 
+                else { $('.prev').click(); }
+            }
+        });
+    });
+
 });
 </script>
 
+<!-- CSS -->
 <style>
 .menu-container {
-    width: 80%;
+    width: 90%;
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 20px 0;
 }
-.category-section {
-    margin-bottom: 30px;
+h1 { text-align: center; margin-bottom: 40px; font-size: 2.5em; color: #333; }
+.category-section { margin-bottom: 50px; }
+h2 { margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #444; }
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
 }
-.menu-item {
-    margin-bottom: 10px;
+.menu-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
 }
+.menu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+.menu-image { text-align: center; }
+.menu-image img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    cursor: pointer;
+}
+.menu-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.menu-info h3 { margin: 0 0 10px 0; font-size: 1.2em; color: #222; }
+.menu-info .description { flex-grow: 1; font-size: 0.95em; color: #555; margin-bottom: 10px; }
+.menu-info .price { font-weight: bold; color: #000; margin-bottom: 10px; }
 .add-cart {
     background-color: #4CAF50;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 8px 12px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
 }
-.add-cart:hover {
-    background-color: #45a049;
-}
+.add-cart:hover { background-color: #45a049; }
 .view-cart-btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 10px 15px;
+    display: block;
+    text-align: center;
+    margin: 30px auto;
+    padding: 12px 20px;
     background-color: #2196F3;
     color: white;
     text-decoration: none;
-    border-radius: 4px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.2s;
 }
-.view-cart-btn:hover {
-    background-color: #0b7dda;
+.view-cart-btn:hover { background-color: #0b7dda; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .menu-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    .menu-image img { height: 120px; }
 }
+@media (max-width: 480px) {
+    .menu-grid { grid-template-columns: 1fr; }
+}
+
+/* Modal */
+.image-modal {
+    display: none;  /* default hidden */
+    position: fixed;
+    z-index: 2000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.85);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.image-modal.show {  /* only visible when .show is added */
+    display: flex;
+}
+.modal-content-wrapper { display: flex; flex-direction: column; align-items: center; }
+.image-modal .modal-content {
+    max-width: 90%;
+    max-height: 70vh;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255,255,255,0.3);
+    object-fit: contain;
+}
+.image-modal .close {
+    position: absolute;
+    top: 25px;
+    right: 35px;
+    color: #fff;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.image-modal .close:hover { color: #bbb; }
+.image-modal .prev,
+.image-modal .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 30px;
+    user-select: none;
+    transform: translateY(-50%);
+}
+.image-modal .prev { left: 10px; }
+.image-modal .next { right: 10px; }
+.image-modal .prev:hover,
+.image-modal .next:hover { color: #bbb; }
+
+/* Dots */
+.dots-container { text-align: center; margin-top: 15px; }
+.dot {
+    height: 12px;
+    width: 12px;
+    margin: 0 4px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.dot.active { background-color: #fff; }
 </style>
 {% endblock %}

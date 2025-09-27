@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'staff',
     'corsheaders',
+
+  
+
 ]
 
 MIDDLEWARE = [
@@ -85,6 +88,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+
 
 
 # Database
@@ -132,7 +136,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+
+# For production - where collectstatic will put all static files
+
+# Must be a string, not Path
+
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / "staticfiles" 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -176,4 +191,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+}
+
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [("redis", 6379)]},
+    }
 }
