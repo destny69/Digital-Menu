@@ -149,7 +149,7 @@
 
     <div id="qrcode"></div>
 
-    <a href="https://your-digital-menu-link.com" class="btn btn-web">Continue on Web</a>
+    <a href="{% url 'select_language_table' %}" class="btn btn-web">Continue on Web</a>
     <a href="https://github.com/destny69/Digital-Menu" class="btn btn-code" target="_blank">View Source Code</a>
 
     <footer>📱 Designed for mobile viewing</footer>
@@ -157,7 +157,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
-    const projectURL = "https://your-digital-menu-link.com";
+    const projectURL = "http://159.89.165.127/en";
     new QRCode(document.getElementById("qrcode"), {
       text: projectURL,
       width: 160,
