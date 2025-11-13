@@ -1,10 +1,142 @@
 {% extends 'base.html' %}
 {% load i18n %}
+
 {% block content %}
-  <h2>{% trans "Select Language and Table" %}</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% trans "Continue" %}</button>
-  </form>
+<style>
+    :root {
+        --primary: #FF6B35;
+        --primary-dark: #E85A2A;
+        --secondary: #2C3E50;
+        --accent: #FFD93D;
+        --text-dark: #1A1A1A;
+        --text-light: #6C757D;
+        --bg-light: #F8F9FA;
+        --card-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+  
+    .content-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        padding: 2rem;
+        max-width: 500px;
+        width: 100%;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .content-card:hover {
+        box-shadow: var(--card-shadow-hover);
+        transform: translateY(-4px);
+    }
+
+    .icon-badge {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: white;
+        margin: 0 auto 1rem;
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    }
+
+    h2 {
+        font-weight: 700;
+        color: var(--secondary);
+        margin-bottom: 0.75rem;
+    }
+
+    p {
+        color: var(--text-light);
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+    }
+
+    form label {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control,
+    .form-select {
+        border: 2px solid rgba(0,0,0,0.05);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: none;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.2);
+    }
+
+    .btn-modern {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 50px;
+        padding: 0.9rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        width: 100%;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    }
+
+    .btn-modern:active {
+        transform: translateY(0);
+    }
+
+    @media (max-width: 576px) {
+        .content-card {
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+        }
+
+        .btn-modern {
+            font-size: 1rem;
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="content-card text-center shadow-lg">
+    <div class="icon-badge mx-auto">🌐</div>
+    <h2>{% trans "Select Language and Table" %}</h2>
+    <p>{% trans "Please choose your preferred language and enter your table number to continue." %}</p>
+
+    <form method="post" class="text-start">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_language">{% trans "Language" %}</label>
+            {{ form.language }}
+        </div>
+        <div class="mb-4">
+            <label for="id_table">{% trans "Table Number" %}</label>
+            {{ form.table }}
+        </div>
+        <button type="submit" class="btn-modern">{% trans "Continue" %}</button>
+    </form>
+</div>
 {% endblock %}

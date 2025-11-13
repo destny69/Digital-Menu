@@ -111,3 +111,8 @@ def update_cart_item(request, cart_id):
         'quantity': cart_item.quantity,
         'subtotal': float(cart_item.subtotal())
     })
+
+
+
+def index(request):
+    return render(request, 'index.html')

@@ -4,17 +4,28 @@
 
 {% block content %}
 <div class="menu-container">
-    <h1>Our Menu</h1>
+    <div class="menu-header">
+        <h1 class="menu-title">Our Menu</h1>
+        <p class="menu-subtitle">Delicious dishes crafted with love</p>
+    </div>
 
-    <div class="category-buttons">
+    <!-- Category Filter Pills -->
+    <div class="category-pills">
         {% for category in categories %}
-            <button class="category-btn" data-id="{{ category.id }}">{{ category.name }}</button>
+            <button class="category-pill" data-id="{{ category.id }}">
+                {{ category.name }}
+            </button>
         {% endfor %}
     </div>
 
+    <!-- Menu Items by Category -->
     {% for category in categories %}
-    <div class="category-section">
-        <h2>{{ category.name }}</h2>
+    <div class="category-section" id="category-{{ category.id }}">
+        <div class="category-header">
+            <h2 class="category-title">{{ category.name }}</h2>
+            <div class="category-line"></div>
+        </div>
+        
         <div class="menu-grid">
             {% for item in category.items.all %}
             <div class="menu-card">
@@ -23,72 +34,631 @@
                     <img src="{{ item.images.all.0.image.url }}" 
                          alt="{{ item.name }}" 
                          class="clickable-image"
-                         data-images='[{% for img in item.images.all %}"{{ img.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                         data-images='[{% for img in item.images.all %}"{{ img.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]'
+                         loading="lazy">
+                    <div class="image-overlay">
+                        <span class="zoom-icon">🔍</span>
+                    </div>
                 </div>
                 {% endif %}
 
                 <div class="menu-info">
-                    <h3>{{ item.name }}</h3>
-                    <p class="description">{{ item.description }}</p>
-                    <p class="price">₹{{ item.price }}</p>
-
-                    <!-- ✅ Show Options if available -->
+                    <h3 class="item-name">{{ item.name }}</h3>
+                    <p class="item-description">{{ item.description }}</p>
+                    
                     {% if item.options.all %}
                         <div class="menu-options">
+                            <p class="options-label">Choose your option:</p>
                             {% for option in item.options.all %}
-                                <label>
+                                <label class="option-label">
                                     <input type="radio" 
                                            name="options_{{ option.group.id }}_{{ item.id }}" 
                                            value="{{ option.id }}">
-                                    {{ option.name }}
-                                </label><br>
+                                    <span class="option-text">{{ option.name }}</span>
+                                </label>
                             {% endfor %}
                         </div>
                     {% endif %}
 
-                    <button class="add-cart" data-id="{{ item.id }}">Add to Cart</button>
+                    <div class="card-footer">
+                        <span class="item-price">₹{{ item.price }}</span>
+                        <button class="add-cart" data-id="{{ item.id }}">
+                            <span class="cart-icon">🛒</span>
+                            <span>Add</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
     {% endfor %}
-
-    <a href="{% url 'menu:cart' %}" class="view-cart-btn">View Cart</a>
 </div>
+
+<!-- Floating Cart Button -->
+<a href="{% url 'menu:cart' %}" class="floating-cart">
+    <span class="cart-badge" id="cartBadge">0</span>
+    <span class="cart-icon-large">🛒</span>
+    <span class="cart-text">Cart</span>
+</a>
 
 <!-- Image Modal -->
 <div id="imageModal" class="image-modal">
-    <span class="close">&times;</span>
-    <span class="prev">&#10094;</span>
-    <span class="next">&#10095;</span>
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <button class="modal-nav prev" aria-label="Previous">‹</button>
+    <button class="modal-nav next" aria-label="Next">›</button>
     <div class="modal-content-wrapper">
-        <img class="modal-content" id="modalImage">
+        <img class="modal-image" id="modalImage" alt="Menu item">
         <div id="dotsContainer" class="dots-container"></div>
     </div>
 </div>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock %}
 
-<!-- JS -->
+{% block extra_css %}
+<style>
+/* Menu Container */
+.menu-container {
+    padding-bottom: 100px;
+}
+
+/* Header */
+.menu-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.menu-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    letter-spacing: -1px;
+}
+
+.menu-subtitle {
+    color: var(--text-light);
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Category Pills */
+.category-pills {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.category-pills::-webkit-scrollbar {
+    display: none;
+}
+
+.category-pill {
+    flex-shrink: 0;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.category-pill:hover,
+.category-pill.active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+/* Category Section */
+.category-section {
+    margin-bottom: 3rem;
+}
+
+.category-header {
+    margin-bottom: 1.5rem;
+}
+
+.category-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.category-line {
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary) 0%, transparent 100%);
+    border-radius: 2px;
+}
+
+/* Menu Grid */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Menu Card */
+.menu-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+/* Menu Image */
+.menu-image {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+}
+
+.menu-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.5s ease;
+}
+
+.menu-card:hover .menu-image img {
+    transform: scale(1.1);
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.menu-card:hover .image-overlay {
+    opacity: 1;
+}
+
+.zoom-icon {
+    font-size: 2rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Menu Info */
+.menu-info {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.item-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+}
+
+.item-description {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    flex-grow: 1;
+}
+
+/* Options */
+.menu-options {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.options-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option-label input[type="radio"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+}
+
+.option-text {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+/* Card Footer */
+.card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.item-price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+}
+
+.add-cart {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+}
+
+.add-cart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 107, 53, 0.3);
+}
+
+.add-cart:active {
+    transform: translateY(0);
+}
+
+.cart-icon {
+    font-size: 1.1rem;
+}
+
+/* Floating Cart Button */
+.floating-cart {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
+    color: white;
+    text-decoration: none;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.floating-cart:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 32px rgba(255, 107, 53, 0.5);
+    color: white;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #FF3B30;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 3px solid white;
+}
+
+.cart-icon-large {
+    font-size: 1.75rem;
+    margin-bottom: 2px;
+}
+
+.cart-text {
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: -2px;
+}
+
+/* Modal */
+body.modal-open {
+    overflow: hidden;
+}
+
+.image-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.image-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.modal-image {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    object-fit: contain;
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    line-height: 1;
+    padding: 0;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 2.5rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    line-height: 1;
+    padding: 0;
+}
+
+.modal-nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-nav.prev {
+    left: 20px;
+}
+
+.modal-nav.next {
+    right: 20px;
+}
+
+/* Dots */
+.dots-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    justify-content: center;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background-color: white;
+    transform: scale(1.3);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .menu-title {
+        font-size: 2rem;
+    }
+
+    .menu-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .menu-image {
+        height: 180px;
+    }
+
+    .category-title {
+        font-size: 1.5rem;
+    }
+
+    .floating-cart {
+        width: 60px;
+        height: 60px;
+    }
+
+    .cart-icon-large {
+        font-size: 1.5rem;
+    }
+
+    .cart-text {
+        font-size: 0.65rem;
+    }
+
+    .modal-nav,
+    .modal-close {
+        width: 45px;
+        height: 45px;
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .menu-image {
+        height: 220px;
+    }
+
+    .category-pills {
+        gap: 0.5rem;
+    }
+
+    .category-pill {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.85rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function(){
+    let cartCount = 0;
 
-    // ✅ Add to cart
+    // Category pill smooth scroll
+    $('.category-pill').click(function(){
+        let categoryId = $(this).data('id');
+        let target = $('#category-' + categoryId);
+        
+        $('.category-pill').removeClass('active');
+        $(this).addClass('active');
+        
+        if(target.length) {
+            $('html, body').animate({
+                scrollTop: target.offset().top - 100
+            }, 500);
+        }
+    });
+
+    // Add to cart with animation
     $('.add-cart').click(function(){
         let itemId = $(this).data('id');
+        let button = $(this);
+        
+        button.prop('disabled', true);
+        button.html('<span>Adding...</span>');
 
         $.get("{% url 'menu:add_to_cart_ajax' 0 %}".replace('0', itemId), function(data){
             if(data.success){
-                alert(data.item_name + ' added to cart. Quantity: ' + data.quantity);
+                cartCount++;
+                $('#cartBadge').text(cartCount).addClass('pulse');
+                
+                button.html('<span>✓ Added</span>');
+                setTimeout(() => {
+                    button.html('<span class="cart-icon">🛒</span><span>Add</span>');
+                    button.prop('disabled', false);
+                }, 1500);
+                
+                // Show toast notification
+                showToast(data.item_name + ' added to cart');
             } else {
-                alert('Failed to add item to cart.');
+                button.html('<span>✗ Failed</span>');
+                setTimeout(() => {
+                    button.html('<span class="cart-icon">🛒</span><span>Add</span>');
+                    button.prop('disabled', false);
+                }, 1500);
             }
         });
     });
 
-    // ✅ Modal functionality
+    // Toast notification
+    function showToast(message) {
+        let toast = $('<div class="toast-notification">' + message + '</div>');
+        $('body').append(toast);
+        
+        setTimeout(() => toast.addClass('show'), 10);
+        setTimeout(() => {
+            toast.removeClass('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    // Image modal
     $('.clickable-image').click(function(){
         let images = JSON.parse($(this).attr('data-images'));
         let currentIndex = 0;
@@ -115,26 +685,18 @@ $(document).ready(function(){
             $('#dotsContainer .dot').eq(currentIndex).addClass('active');
         }
 
-        // Init modal
         createDots();
         showImage(currentIndex);
-        $('#imageModal').addClass('show').fadeIn();
-        $('body').addClass('modal-open');   // ✅ disable background scroll
+        $('#imageModal').addClass('show').fadeIn(300);
+        $('body').addClass('modal-open');
 
-        // Close modal
-        $('.close').off('click').on('click', function(){
-            $('#imageModal').removeClass('show').fadeOut();
-            $('body').removeClass('modal-open');   // ✅ re-enable scroll
-        });
-        $('#imageModal').off('click').on('click', function(e){
-            if(e.target.id === 'imageModal'){
-                $(this).removeClass('show').fadeOut();
-                $('body').removeClass('modal-open');   // ✅ re-enable scroll
+        $('.modal-close, #imageModal').off('click').on('click', function(e){
+            if(e.target === this) {
+                $('#imageModal').removeClass('show').fadeOut(300);
+                $('body').removeClass('modal-open');
             }
         });
 
-
-        // Arrows
         $('.prev').off('click').on('click', function(e){
             e.stopPropagation();
             if(images.length > 0){
@@ -142,6 +704,7 @@ $(document).ready(function(){
                 showImage(currentIndex);
             }
         });
+
         $('.next').off('click').on('click', function(e){
             e.stopPropagation();
             if(images.length > 0){
@@ -150,7 +713,7 @@ $(document).ready(function(){
             }
         });
 
-        // Mobile swipe
+        // Swipe support
         let startX = 0;
         $('#modalImage').off('touchstart').on('touchstart', function(e){
             startX = e.originalEvent.touches[0].clientX;
@@ -159,193 +722,55 @@ $(document).ready(function(){
             let endX = e.originalEvent.changedTouches[0].clientX;
             let diff = startX - endX;
             if(Math.abs(diff) > 50){
-                if(diff > 0){ $('.next').click(); } 
+                if(diff > 0) { $('.next').click(); } 
                 else { $('.prev').click(); }
             }
         });
-    });
 
+        // Keyboard navigation
+        $(document).off('keydown.modal').on('keydown.modal', function(e){
+            if($('#imageModal').hasClass('show')) {
+                if(e.key === 'ArrowLeft') $('.prev').click();
+                if(e.key === 'ArrowRight') $('.next').click();
+                if(e.key === 'Escape') $('.modal-close').click();
+            }
+        });
+    });
 });
 </script>
 
-<!-- CSS -->
 <style>
-
-.category-buttons {
-    text-align: center;
-    margin: 30px 0;
-}
-.category-btn {
-    margin: 5px;
-    padding: 10px 18px;
-    background: #f4f4f4;
-    border: 1px solid #ccc;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.category-btn:hover {
-    background: #2196F3;
-    color: #fff;
-    border-color: #2196F3;
-}
-.category-btn.active {
-    background: #2196F3;
-    color: #fff;
-}
-
-
-
-.menu-container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px 0;
-}
-h1 { text-align: center; margin-bottom: 40px; font-size: 2.5em; color: #333; }
-.category-section { margin-bottom: 50px; }
-h2 { margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #444; }
-
-.menu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-}
-.menu-card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    background-color: #fff;
-    display: flex;
-    flex-direction: column;
-}
-.menu-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-}
-.menu-image { text-align: center; }
-.menu-image img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    cursor: pointer;
-}
-.menu-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-.menu-info h3 { margin: 0 0 10px 0; font-size: 1.2em; color: #222; }
-.menu-info .description { flex-grow: 1; font-size: 0.95em; color: #555; margin-bottom: 10px; }
-.menu-info .price { font-weight: bold; color: #000; margin-bottom: 10px; }
-.add-cart {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.2s;
-}
-.add-cart:hover { background-color: #45a049; }
-/* Floating View Cart Button */
-.view-cart-btn {
+/* Toast Notification */
+.toast-notification {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 12px 20px;
-    background-color: #2196F3;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(0, 0, 0, 0.9);
     color: white;
-    text-decoration: none;
-    border-radius: 50px; /* pill-shaped */
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    z-index: 3000; /* above modal if needed */
-    transition: background-color 0.2s, transform 0.2s;
-}
-.view-cart-btn:hover {
-    background-color: #0b7dda;
-    transform: translateY(-2px);
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
-
-/* Responsive */
-@media (max-width: 768px) {
-    .menu-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
-    .menu-image img { height: 120px; }
-}
-@media (max-width: 480px) {
-    .menu-grid { grid-template-columns: 1fr; }
+.toast-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
-/* ✅ Disable background scroll when modal open */
-body.modal-open {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
+/* Pulse animation for cart badge */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
 }
 
-/* Modal */
-.image-modal {
-    display: none;  /* default hidden */
-    position: fixed;
-    z-index: 2000;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.85);
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+.cart-badge.pulse {
+    animation: pulse 0.3s ease;
 }
-.image-modal.show {  /* only visible when .show is added */
-    display: flex;
-}
-.modal-content-wrapper { display: flex; flex-direction: column; align-items: center; }
-.image-modal .modal-content {
-    max-width: 90%;
-    max-height: 70vh;
-    margin: auto;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(255,255,255,0.3);
-    object-fit: contain;
-}
-.image-modal .close {
-    position: absolute;
-    top: 25px;
-    right: 35px;
-    color: #fff;
-    font-size: 35px;
-    font-weight: bold;
-    cursor: pointer;
-}
-.image-modal .close:hover { color: #bbb; }
-.image-modal .prev,
-.image-modal .next {
-    cursor: pointer;
-    position: absolute;
-    top: 50%;
-    width: auto;
-    padding: 16px;
-    color: white;
-    font-weight: bold;
-    font-size: 30px;
-    user-select: none;
-    transform: translateY(-50%);
-}
-.image-modal .prev { left: 10px; }
-.image-modal .next { right: 10px; }
-.image-modal .prev:hover,
-.image-modal .next:hover { color: #bbb; }
-
-/* Dots */
-.dots-container { text-align: center; margin-top: 15px; }
-.dot {
-    height: 12px;
-    width: 12px;
-    margin: 0 4px;
-    background-color: #bbb;
-    border-radius: 50%;
-    display: inline-block;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-.dot.active { background-color: #fff; }
 </style>
 {% endblock %}
