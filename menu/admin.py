@@ -1,6 +1,6 @@
 from django.contrib import admin
 from parler.admin import TranslatableAdmin
-from .models import Table, Category, MenuItem, Order, MenuItemImage
+from .models import Table, Category, MenuItem, Order, MenuItemImage, OrderItem
 
 
 @admin.register(Table)
@@ -23,7 +23,6 @@ class MenuItemAdmin(TranslatableAdmin):
     search_fields = ("translations__name", "translations__description")
 
 
-
 admin.site.register(MenuItemImage)
 
 admin.site.register(Order)
@@ -35,3 +34,5 @@ admin.site.register(Order)
 #     ordering = ("-created_at",)
 #     date_hierarchy = "created_at"
 
+
+admin.site.register(OrderItem)

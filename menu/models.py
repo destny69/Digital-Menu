@@ -40,16 +40,23 @@ class MenuItemImage(models.Model):
 
     def __str__(self):
         return f"{self.menu_item} Image"
+    
+
+
 
 # Temporary cart item
 class CartItem(models.Model):
     session_key = models.CharField(max_length=40)  # track by user session (for guest users)
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
+    
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
     def subtotal(self):
         return self.menu_item.price * self.quantity
+
+
+
 
 
 # Final Order
@@ -92,7 +99,6 @@ class Order(models.Model):
             if self.status in ["completed", "cancelled"] and self.table:
                 self.table.is_occupied = False
                 self.table.save(update_fields=["is_occupied"])
-
 
 
 # Items inside order

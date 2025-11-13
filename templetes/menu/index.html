@@ -6,6 +6,12 @@
 <div class="menu-container">
     <h1>Our Menu</h1>
 
+    <div class="category-buttons">
+        {% for category in categories %}
+            <button class="category-btn" data-id="{{ category.id }}">{{ category.name }}</button>
+        {% endfor %}
+    </div>
+
     {% for category in categories %}
     <div class="category-section">
         <h2>{{ category.name }}</h2>
@@ -14,17 +20,32 @@
             <div class="menu-card">
                 {% if item.images.all %}
                 <div class="menu-image">
-                    <!-- First image as thumbnail -->
                     <img src="{{ item.images.all.0.image.url }}" 
                          alt="{{ item.name }}" 
                          class="clickable-image"
                          data-images='[{% for img in item.images.all %}"{{ img.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]'>
                 </div>
                 {% endif %}
+
                 <div class="menu-info">
                     <h3>{{ item.name }}</h3>
                     <p class="description">{{ item.description }}</p>
                     <p class="price">₹{{ item.price }}</p>
+
+                    <!-- ✅ Show Options if available -->
+                    {% if item.options.all %}
+                        <div class="menu-options">
+                            {% for option in item.options.all %}
+                                <label>
+                                    <input type="radio" 
+                                           name="options_{{ option.group.id }}_{{ item.id }}" 
+                                           value="{{ option.id }}">
+                                    {{ option.name }}
+                                </label><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
                     <button class="add-cart" data-id="{{ item.id }}">Add to Cart</button>
                 </div>
             </div>
@@ -57,6 +78,7 @@ $(document).ready(function(){
     // ✅ Add to cart
     $('.add-cart').click(function(){
         let itemId = $(this).data('id');
+
         $.get("{% url 'menu:add_to_cart_ajax' 0 %}".replace('0', itemId), function(data){
             if(data.success){
                 alert(data.item_name + ' added to cart. Quantity: ' + data.quantity);
@@ -97,16 +119,20 @@ $(document).ready(function(){
         createDots();
         showImage(currentIndex);
         $('#imageModal').addClass('show').fadeIn();
+        $('body').addClass('modal-open');   // ✅ disable background scroll
 
         // Close modal
         $('.close').off('click').on('click', function(){
             $('#imageModal').removeClass('show').fadeOut();
+            $('body').removeClass('modal-open');   // ✅ re-enable scroll
         });
         $('#imageModal').off('click').on('click', function(e){
             if(e.target.id === 'imageModal'){
                 $(this).removeClass('show').fadeOut();
+                $('body').removeClass('modal-open');   // ✅ re-enable scroll
             }
         });
+
 
         // Arrows
         $('.prev').off('click').on('click', function(e){
@@ -144,6 +170,32 @@ $(document).ready(function(){
 
 <!-- CSS -->
 <style>
+
+.category-buttons {
+    text-align: center;
+    margin: 30px 0;
+}
+.category-btn {
+    margin: 5px;
+    padding: 10px 18px;
+    background: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.category-btn:hover {
+    background: #2196F3;
+    color: #fff;
+    border-color: #2196F3;
+}
+.category-btn.active {
+    background: #2196F3;
+    color: #fff;
+}
+
+
+
 .menu-container {
     width: 90%;
     max-width: 1200px;
@@ -193,19 +245,26 @@ h2 { margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 5px; co
     transition: background-color 0.2s;
 }
 .add-cart:hover { background-color: #45a049; }
+/* Floating View Cart Button */
 .view-cart-btn {
-    display: block;
-    text-align: center;
-    margin: 30px auto;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
     padding: 12px 20px;
     background-color: #2196F3;
     color: white;
     text-decoration: none;
-    border-radius: 6px;
+    border-radius: 50px; /* pill-shaped */
     font-weight: bold;
-    transition: background-color 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 3000; /* above modal if needed */
+    transition: background-color 0.2s, transform 0.2s;
 }
-.view-cart-btn:hover { background-color: #0b7dda; }
+.view-cart-btn:hover {
+    background-color: #0b7dda;
+    transform: translateY(-2px);
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -214,6 +273,13 @@ h2 { margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 5px; co
 }
 @media (max-width: 480px) {
     .menu-grid { grid-template-columns: 1fr; }
+}
+
+/* ✅ Disable background scroll when modal open */
+body.modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
 }
 
 /* Modal */

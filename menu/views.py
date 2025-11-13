@@ -40,20 +40,6 @@ def menu_view(request):
     })
 
 
-
-def add_to_cart(request, item_id):
-    menu_item = get_object_or_404(MenuItem, id=item_id)
-    session_key = request.session.session_key or request.session.create()
-    cart_item, created = CartItem.objects.get_or_create(
-        session_key=session_key,
-        menu_item=menu_item,
-    )
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
-    return redirect('menu:cart')
-
-
 def cart_view(request):
     session_key = request.session.session_key
     cart_items = CartItem.objects.filter(session_key=session_key)

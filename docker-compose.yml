@@ -5,7 +5,7 @@ services:
     build: .
     container_name: django_app
     volumes:
-      - app_volume:/app
+      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     expose:
@@ -26,4 +26,4 @@ services:
 volumes:
   static_volume:
   media_volume:
-  app_volume:
+
