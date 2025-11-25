@@ -33,7 +33,7 @@ services:
 
     depends_on:
       - web
-      - nextjs
+      - nextjs_build
 
 volumes:
   static_volume:
