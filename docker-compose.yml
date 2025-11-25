@@ -11,15 +11,14 @@ services:
     expose:
       - "8000"
 
-  nextjs:
-    build:
-      context: ./portfolio
-      dockerfile: docker/Dockerfile
-    container_name: nextjs_app
+  nextjs_build:
+    image: node:18-alpine
+    container_name: portfolio_builder
+    working_dir: /app
     volumes:
       - ./portfolio:/app
-    ports:
-      - "8080:8080"
+      - ./portfolio/dist:/app/dist
+    command: sh -c "npm install && npm run build"
 
   nginx:
     image: nginx:alpine
@@ -30,9 +29,11 @@ services:
       - static_volume:/staticfiles
       - media_volume:/app/media
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./portfolio/dist:/usr/share/nginx/html/portfolio:ro
+
     depends_on:
       - web
-      - nextjs
+      - nextjs_build
 
 volumes:
   static_volume:
