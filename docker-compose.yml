@@ -14,7 +14,7 @@ services:
   nextjs:
     build:
       context: ./portfolio
-      dockerfile: django/Dockerfile
+      dockerfile: docker/Dockerfile
     container_name: nextjs_app
     volumes:
       - ./portfolio:/app
