@@ -5,7 +5,8 @@ pipeline {
     stage('Checkout App') {
       steps {
         dir('app') {
-          git 'https://github.com/destny69/Digital-Menu.git'
+          git(url: 'https://github.com/destny69/Digital-Menu.git', branch: 'main')
+
         }
       }
     }
@@ -19,7 +20,8 @@ pipeline {
     stage('Checkout Ansible') {
       steps {
         dir('ansible') {
-          git 'https://github.com/destny69/ansibe-appdeploy.git'
+
+          git(url: 'https://github.com/destny69/ansibe-appdeploy.git', branch: 'main')
         }
       }
     }
