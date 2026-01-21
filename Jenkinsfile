@@ -30,6 +30,7 @@ pipeline {
     stage('deploy') {
       steps {
         sh 'echo "Deploying the project..."'
+        sh 'docker stop $(docker ps -q --filter ancestor=digital-menu:latest) || true'
         sh 'docker run -d -p 8000:8000 digital-menu:latest'
       }
     }
