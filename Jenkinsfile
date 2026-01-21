@@ -29,7 +29,7 @@ pipeline {
     stage('Deploy via Ansible') {
       steps {
         dir('ansible') {
-          sh 'ansible-playbook -i inventory deploy.yml'
+          sh 'ansible-playbook -i inventory/hosts.yml playbooks/deploy.yml'
         }
       }
     }
