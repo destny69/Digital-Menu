@@ -17,14 +17,14 @@ pipeline {
       }
     }
 
-    stage('Checkout Ansible') {
-      steps {
-        dir('ansible') {
-
-          git(url: 'https://github.com/destny69/ansibe-appdeploy.git', branch: 'main')
-        }
-      }
+    stage('checkout ansible') {
+  steps {
+    dir('ansible') {
+      git credentialsId: '4ba7cfe1-1a3a-4dc6-851b-2b0152766966', url: 'https://github.com/destny69/ansibe-appdeploy.git', branch: 'main'
     }
+  }
+}
+
 
     stage('Deploy via Ansible') {
       steps {
