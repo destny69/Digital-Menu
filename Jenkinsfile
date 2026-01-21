@@ -13,6 +13,20 @@ pipeline {
       }
     }
 
+    stage('checkout ansible') {
+      steps {
+        git(url: 'https://github.com/destny69/ansibe-appdeploy.git', branch: 'main')
+      }
+    }
+
+  
+    stage('checkin in ansible') {
+      steps {
+        sh 'echo "Running tests..."'
+        sh 'ansible-playbook -i inventory deploy.yml'
+      }
+    }
+
     stage('deploy') {
       steps {
         sh 'echo "Deploying the project..."'
