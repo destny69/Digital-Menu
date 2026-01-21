@@ -1,39 +1,35 @@
 pipeline {
   agent any
+
   stages {
-    stage('checkout') {
+    stage('Checkout App') {
       steps {
-        git(url: 'https://github.com/destny69/Digital-Menu.git', branch: 'main')
-      }
-    }
-    stage('build') {
-      steps {
-        sh 'echo "Building the project..."'
-        sh 'docker build -t digital-menu:latest .'
+        dir('app') {
+          git 'https://github.com/destny69/Digital-Menu.git'
+        }
       }
     }
 
-    stage('checkout ansible') {
+    stage('Build Docker Image') {
       steps {
-        git(url: 'https://github.com/destny69/ansibe-appdeploy.git', branch: 'main')
+        sh 'docker build -t digital-menu:latest app/'
       }
     }
 
-  
-    stage('checkin in ansible') {
+    stage('Checkout Ansible') {
       steps {
-        sh 'echo "Running tests..."'
-        sh 'ansible-playbook -i inventory deploy.yml'
+        dir('ansible') {
+          git 'https://github.com/destny69/ansibe-appdeploy.git'
+        }
       }
     }
 
-    stage('deploy') {
+    stage('Deploy via Ansible') {
       steps {
-        sh 'echo "Deploying the project..."'
-        sh 'docker stop $(docker ps -q --filter ancestor=digital-menu:latest) || true'
-        sh 'docker run -d -p 8000:8000 digital-menu:latest'
+        dir('ansible') {
+          sh 'ansible-playbook -i inventory deploy.yml'
+        }
       }
     }
-
   }
 }
